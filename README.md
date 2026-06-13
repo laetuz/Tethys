@@ -22,23 +22,27 @@
     <td align="center" width="33%">
       <strong>📱 Phone</strong>
       <br><br>
-      <img src="resources/img_1.png" width="90%" alt="Phone preview">
-      <br>
-      <video src="resources/android_prev_1.mp4" width="90%" controls muted loop playsinline></video>
+      <a href="resources/android_prev_1.mp4">
+        <img src="resources/img_2.jpg" width="90%" alt="Phone preview — click for video">
+        <br>
+        <sup>▶ Click screenshot for video</sup>
+      </a>
     </td>
     <td align="center" width="33%">
       <strong>🖥️ Desktop</strong>
       <br><br>
       <img src="resources/img_1.png" width="90%" alt="Desktop preview">
       <br>
-      <em>Desktop shares the same Compose UI</em>
+      <sup>Desktop shares the same Compose UI</sup>
     </td>
     <td align="center" width="33%">
       <strong>⌚ Wear OS</strong>
       <br><br>
-      <img src="resources/img.png" width="70%" alt="Wear OS preview">
-      <br>
-      <video src="resources/wear_prev_1.mp4" width="70%" controls muted loop playsinline></video>
+      <a href="resources/wear_prev_1.mp4">
+        <img src="resources/img.png" width="70%" alt="Wear OS preview — click for video">
+        <br>
+        <sup>▶ Click screenshot for video</sup>
+      </a>
     </td>
   </tr>
 </table>
