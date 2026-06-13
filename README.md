@@ -23,7 +23,7 @@
       <strong>📱 Phone</strong>
       <br><br>
       <a href="resources/android_prev_1.mp4">
-        <img src="resources/img_2.jpg" width="90%" alt="Phone preview — click for video">
+        <img src="resources/img_2.jpg" width="40%" alt="Phone preview — click for video">
         <br>
         <sup>▶ Click screenshot for video</sup>
       </a>
