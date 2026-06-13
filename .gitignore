@@ -16,3 +16,5 @@
 .cxx
 local.properties
 /composeApp/build
+/wearApp/build
+/shared/build

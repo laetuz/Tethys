@@ -23,4 +23,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Tethys"
-include(":composeApp")
+include(":composeApp", ":shared", ":wearApp")

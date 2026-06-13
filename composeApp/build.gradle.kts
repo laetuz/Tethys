@@ -21,6 +21,7 @@ kotlin {
         val desktopMain by getting
 
         commonMain.dependencies {
+            implementation(project(":shared"))
             implementation(libs.compose.runtime)
             implementation(libs.compose.foundation)
             implementation(libs.compose.material3)
@@ -29,16 +30,30 @@ kotlin {
             implementation(libs.koin.compose)
         }
         androidMain.dependencies {
+            implementation(project(":shared"))
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
+            implementation(libs.compose.ui)
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
             implementation(libs.koin.android)
             implementation(libs.androidx.activity.compose)
         }
         desktopMain.dependencies {
+            implementation(project(":shared"))
+            implementation(libs.compose.runtime)
+            implementation(libs.compose.foundation)
+            implementation(libs.compose.material3)
+            implementation(libs.compose.ui)
             implementation(compose.desktop.currentOs)
+            implementation(libs.koin.core)
+            implementation(libs.koin.compose)
         }
     }
 }
 
-android {
+configure<com.android.build.api.dsl.ApplicationExtension> {
     namespace = "id.neotica.tethys"
     compileSdk = 36
 
