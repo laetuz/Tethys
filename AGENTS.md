@@ -50,9 +50,17 @@ The project is split into three modules:
     ```bash
     ./gradlew composeApp:compileDebugKotlinAndroid
     ```
+*   **Build Phone `debugrelease` APK (minified + shrunk):**
+    ```bash
+    ./gradlew composeApp:assembleDebugRelease
+    ```
 *   **Build Wear OS Target:**
     ```bash
     ./gradlew :wearApp:assembleDebug
+    ```
+*   **Build Wear OS `debugrelease` APK (minified + shrunk):**
+    ```bash
+    ./gradlew :wearApp:assembleDebugRelease
     ```
 *   **Create a Release (GitHub Actions):**
     Push a version tag to trigger the CI/CD pipeline that builds both APKs and publishes a GitHub Release:

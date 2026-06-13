@@ -32,21 +32,21 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Build phone APK
-        run: ./gradlew composeApp:assembleDebug
+        run: ./gradlew composeApp:assembleDebugRelease
 
       - name: Build Wear OS APK
-        run: ./gradlew :wearApp:assembleDebug
+        run: ./gradlew :wearApp:assembleDebugRelease
 
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v4
         with:
           name: apks
           path: |
-            **/build/outputs/apk/debug/*.apk
+            **/build/outputs/apk/debugrelease/*.apk
 
       - name: Create Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            **/build/outputs/apk/debug/*.apk
+            **/build/outputs/apk/debugrelease/*.apk
