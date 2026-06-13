@@ -50,7 +50,7 @@ The project is split into three modules:
     ```bash
     ./gradlew composeApp:compileDebugKotlinAndroid
     ```
-*   **Build Phone `debugrelease` APK (minified + shrunk):**
+*   **Build Phone `debugRelease` APK (minified + shrunk):**
     ```bash
     ./gradlew composeApp:assembleDebugRelease
     ```
