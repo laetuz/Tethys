@@ -1,49 +1,57 @@
-# Skills Tethys: Terminal ASCII Shark
+# Skills Tethys: Terminal ASCII Shark (KMP)
 
-This document outlines the core technical competencies, theoretical knowledge, and Jetpack Compose-specific skills required to build the idle ASCII shark application. By completing this project, a developer will demonstrate proficiency in the following areas:
+This document outlines the core technical competencies, theoretical knowledge, and Compose Multiplatform skills required to build the idle ASCII shark application. By completing this project, a developer will demonstrate proficiency in the following areas:
 
-## 1. Jetpack Compose Fundamentals
-Building a dynamic UI in Compose requires shifting from the imperative XML model to a declarative, state-driven paradigm.
+## 1. Compose Multiplatform (CMP) Project Setup
 
-* **Declarative UI Paradigm:** Understanding how to describe the UI state at any given moment and letting the Compose compiler handle the UI updates (recomposition) when the underlying data changes.
-* **Layouts and Scopes:** 
-    * Mastery of `BoxWithConstraints`, a crucial layout in this project used to read the exact screen dimensions (`maxWidth`, `maxHeight`) dynamically. This forms the mathematical boundaries of the "tank."
-* **Modifiers:** Utilizing `Modifier.offset` to translate the shark's logical coordinates (X, Y) into actual on-screen rendering positions without triggering heavy layout recalculations.
-* **Multi-line Text Rendering:** Displaying Braille-based ASCII art via `Text` composables with explicit `lineHeight` matching `fontSize` to tightly pack multi-line artwork without extra vertical spacing.
-* **Theming and Typography:** Emulating a retro CRT terminal by utilizing pure color styling (`Color.Black`, `Color.Green`) and manipulating `TextStyle` to enforce a `FontFamily.Monospace` typeface.
+* **KMP Module Structure:** Single `composeApp` module with `androidTarget()` and `jvm("desktop")` targets. Shared UI lives in `commonMain`, platform entry points in `androidMain` / `desktopMain`.
+* **AGP Compatibility:** AGP 9.2.1 with `android.newDsl=false` (KMP's `kotlin.multiplatform` plugin is incompatible with AGP's new DSL). `android.builtInKotlin=false` is required to prevent conflict between KMP's Kotlin plugin and AGP's built-in Kotlin.
+* **Version Catalog:** All dependency versions managed in `gradle/libs.versions.toml` using TOML version catalog. Compose runtime/foundation/ui pinned to `1.11.1`, material3 to `1.9.0`.
+* **CMP Plugin:** The `org.jetbrains.compose` plugin provides Compose accessors (`compose.runtime`, `compose.foundation`, `compose.material3`, `compose.ui`) and the `compose.desktop.currentOs` dependency for desktop.
+* **Desktop Entry:** `composeApp/src/desktopMain/kotlin/.../Main.kt` uses `fun main()` with `application { Window { ... } }`. Koin is started with `startKoin` before the Compose `application` block (no Android Application lifecycle).
 
-## 2. MVI Architecture
-The project follows a unidirectional data flow pattern with three distinct layers per feature.
+## 2. Declarative UI and MVI Architecture
 
-* **UiState:** Immutable data class holding all screen state (shark position, velocity, fish list, timers). Derived properties like `isBiting` are computed inline from raw state fields.
-* **ViewModel:** Owns a `MutableStateFlow<UiState>`, exposes it as a `StateFlow`, and contains pure state-transition logic (`tick()`, `bite()`, `updateTextSize()`). No Compose dependencies — only suspending or synchronous functions.
-* **Screen:** Collects state via `collectAsState()`, calls `koinViewModel()` for DI, runs the frame loop with `withFrameNanos`, and delegates all state mutations to the ViewModel.
-* **Dependency Injection:** Koin (`koin-androidx-compose` 4.2.1) wires ViewModels through a `di/AppModule.kt` module. The Application class calls `startKoin` during `onCreate`.
+* **Declarative UI Paradigm:** Describing UI state at any moment and letting Compose handle recomposition when the underlying data changes.
+* **MVI Triad:**
+  * `TethysUiState` — immutable data class holding all screen state (shark position, velocity, fish list, timers). Derived properties like `isBiting` are computed inline from raw state fields.
+  * `TethysViewModel` — plain class (not Android `ViewModel`), owns a `MutableStateFlow<TethysUiState>`, exposes it as `StateFlow`, contains pure state-transition logic (`tick()`, `bite()`, `updateTextSize()`). No Compose dependencies.
+  * `TethysScreen` — collects state via `collectAsState()`, injects ViewModel via `koinInject()` from `org.koin.compose`, runs the frame loop with `withFrameNanos`, and delegates all state mutations to the ViewModel.
+* **Koin DI:** `koin-core` + `koin-compose` (shared) and `koin-android` (Android-specific) via version `4.2.1`. ViewModel wired through `di/AppModule.kt` using `singleOf(::TethysViewModel)`.
 
 ## 3. Game Loop and Animation Mechanics
-Unlike standard static apps, this project requires a continuous loop running at 60+ frames per second (FPS).
 
-* **Lifecycle-Aware Coroutines:** Using `LaunchedEffect(Unit)` in the Screen composable to safely kick off a continuous loop that calls `viewModel.tick()` each frame and is automatically canceled when the app goes into the background or the view is destroyed.
-* **Frame Synchronization:** Implementing `withFrameNanos` to tie the shark's movement calculations directly to the device's screen refresh rate, ensuring perfectly smooth rendering.
-* **Frame-based Timer:** Tracking a `frameCount` float that increments each frame. Used for sinusoidal undulation (`sin(frameCount * 0.08f)`) and for alternating between two swimming animation frames every 25 frames.
-* **Swim Animation:** Two frames of the normal shark art (`SHARK_NORMAL` / `SHARK_NORMAL1`, and their mirrored counterparts) toggle each cycle to create a swimming illusion. The second frame is generated by shifting the first one Braille cell right.
-* **Bite State:** A `bitingTimer` counts down from `BITE_DURATION_FRAMES` each frame. When active, the biting art is displayed. Triggered by AABB collision with a fish or by tapping the shark.
+* **Lifecycle-Aware Coroutines:** `LaunchedEffect(Unit)` in the Screen composable kicks off a continuous loop calling `viewModel.tick()` each frame, automatically cancelled when the composable leaves composition.
+* **Frame Synchronization:** `withFrameNanos` ties movement calculations directly to the screen refresh rate, ensuring smooth rendering.
+* **Frame-based Timer:** `frameCount` float increments each frame. Used for sinusoidal undulation (`sin(frameCount * 0.08f)`) and toggling between two swimming animation frames every 25 frames.
+* **Swim Animation:** Two art variants (`SHARK_NORMAL` / `SHARK_NORMAL1`, plus their mirrored counterparts) toggle each cycle to create a swimming illusion. The second frame is generated by shifting Braille cells right.
+* **Bite State:** `bitingTimer` counts down from `BITE_DURATION_FRAMES` each frame. When active, the biting art is displayed. Triggered by AABB collision with a fish or by tapping the shark.
 
 ## 4. 2D Coordinate Physics and Mathematics
-The underlying rules that keep the shark swimming realistically within the constraints.
 
-* **Vector Movement:** Calculating frame-by-frame movement by applying velocity vectors to current positions ($X_{new} = X_{current} + v_X$).
-* **Sinusoidal Undulation:** Adding `sin(frameCount * 0.08f) * 0.5f` to the Y velocity each frame, creating a gentle tail-fin sway that mimics natural swimming motion.
-* **Collision Detection (AABB):** Implementing basic Axis-Aligned Bounding Box (AABB) collision checks. The shark's bounding box comes from `onSizeChanged` on the multi-line text; fish use a fixed `FISH_W` / `FISH_H` constant. The logic accounts for both the screen boundaries and element dimensions to prevent clipping before bouncing.
-* **Directional Reversal:** Modifying state by multiplying velocity by $-1$ to simulate a physical "bounce" upon hitting a constraint. A `Direction` enum (`LEFT` / `RIGHT`) derived from `velocityX` selects the appropriate art variant.
-* **Entity Spawning:** Fish are initialized across the screen width at startup. When eaten, they respawn after `RESPAWN_DELAY_FRAMES` at a random edge position, with new random velocity.
+* **Vector Movement:** Frame-by-frame movement by applying velocity vectors to current positions ($X_{new} = X_{current} + v_X$).
+* **Sinusoidal Undulation:** `sin(frameCount * 0.08f) * 0.5f` added to Y velocity each frame, creating a gentle tail-fin sway.
+* **AABB Collision Detection:** Shark bounding box from `onSizeChanged` on the multi-line text; fish use fixed `FISH_W` / `FISH_H` constants. Axis-aligned overlap checks prevent clipping before bounce.
+* **Directional Reversal:** Velocity multiplied by $-1$ upon hitting a boundary. `Direction` enum (`LEFT` / `RIGHT`) derived from `velocityX` selects the appropriate art variant.
+* **Entity Spawning:** Fish initialized across the screen width at startup. When eaten, they respawn after `RESPAWN_DELAY_FRAMES` at a random edge position with new random velocity.
+* **Screen Bounds:** `BoxWithConstraints` reads `maxWidth`/`maxHeight` at composition time. `setBounds()` in the ViewModel initializes fish positions and clamps all entities.
 
 ## 5. Kotlin Language Proficiency
-* **Immutability vs. Mutability:** Using immutable `val` for constant ASCII art strings, mutable `StateFlow` for reactive state, and `var` inside the `tick()` function for temporary computation.
-* **Float Manipulation:** Handling precise floating-point mathematics for fluid pixel movement instead of rigid integer grids.
-* **Scope Functions:** Utilizing Kotlin standard library functions (like `let`, `apply`, or `coerceIn`) to elegantly clamp the shark's coordinates within the safe zones if it accidentally breaches a boundary.
-* **Extension Functions:** `Char.mirrorBraille()` and `String.mirror()` as file-level extensions in the `utils` package. The mirror function pads lines to equal width, reverses character order, and mirrors each Braille dot pattern to produce a horizontally flipped version of the ASCII art.
 
-## 6. Multi-character and Braille Art
-* **Braille Dot Manipulation:** The shark art uses Unicode Braille patterns (U+2800–U+28FF). Mirroring requires bit-swapping within each character: left-column dots (1, 2, 3, 7) are exchanged with right-column dots (4, 5, 6, 8) via bitwise operations on the offset from the Braille block base.
-* **Directional Art Selection:** A `Direction` enum and `when` expression select among four art variants per state (normal-right, normal1-right, biting-right and their left-facing mirrors).
+* **Immutability vs. Mutability:** Immutable `val` for constant ASCII art strings, mutable `StateFlow` for reactive state, `var` inside `tick()` for temporary computation, `.copy()` on data classes for state transitions.
+* **Float Manipulation:** Precise floating-point mathematics for fluid pixel movement.
+* **Scope Functions:** `coerceIn`, `map`, `let`, `apply` for boundary clamping, fish state updates, and collision detection.
+* **Extension Functions:** `Char.mirrorBraille()` and `String.mirror()` as file-level extensions in the `utils` package. Pads lines to equal width, reverses character order, and mirrors each Braille dot.
+
+## 6. Braille Art and Directional Rendering
+
+* **Braille Dot Manipulation:** Unicode Braille patterns (U+2800–U+28FF). Mirroring uses bit-swapping: left-column dots (1, 2, 3, 7) exchange with right-column dots (4, 5, 6, 8) via bitwise operations on the offset from the Braille block base (`char.code - 0x2800`).
+* **Directional Art Selection:** `Direction` enum with `when` selects among four art variants per state (normal-right, normal1-right, biting-right and their left-facing mirrors via `String.mirror()`).
+* **Multi-line Text Rendering:** `Text` composable with explicit `lineHeight = fontSize` to tightly pack multi-line Braille art without extra vertical spacing.
+* **Font Choice:** `FontFamily.Monospace` with pure `Color.Green` on `Color.Black` background emulates a retro CRT terminal.
+
+## 7. Platform-Specific Entry Points
+
+* **Android:** `MainActivity` extends `ComponentActivity` with `enableEdgeToEdge()` and `setContent { TethysTheme { TethysScreen() } }`. `TethysApp` extends `Application` and calls `startKoin { androidContext(this); modules(appModule) }`.
+* **Desktop:** `Main.kt` calls `startKoin { modules(appModule) }` then enters `application { Window(...) { ... } }`. Window size defaults to 800x600 dp. Uses `compose.desktop.currentOs` dependency.
+* **Shared Resources:** The `composeApp/src/androidMain/res/` directory holds Android-specific resources (icons, themes, strings). Desktop has no resource directory.
