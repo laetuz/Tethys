@@ -57,7 +57,7 @@ fun TethysScreen() {
 
         var x by remember { mutableFloatStateOf(maxWidthPx / 2f) }
         var y by remember { mutableFloatStateOf(maxHeightPx / 2f) }
-        var velocityX by remember { mutableFloatStateOf(0.3f) }
+        var velocityX by remember { mutableFloatStateOf(1.3f) }
         var velocityY by remember { mutableFloatStateOf(0.3f) }
         var time by remember { mutableFloatStateOf(0f) }
 
@@ -161,6 +161,7 @@ fun TethysScreen() {
             y = y,
             velocityX = velocityX,
             isBiting = bitingTimer > 0f,
+            frameCount = time,
             onBite = { bitingTimer = BITE_DURATION_FRAMES.toFloat() },
             onSizeChanged = { textSize = it },
             fontSize = SHARK_FONT_SIZE.sp
