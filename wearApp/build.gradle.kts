@@ -32,5 +32,6 @@ dependencies {
     implementation(project(":shared"))
     implementation(libs.wear.compose.material)
     implementation(libs.wear.compose.foundation)
+    implementation(libs.watchface)
     implementation(libs.androidx.activity.compose)
 }

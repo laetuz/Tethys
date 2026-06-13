@@ -8,6 +8,7 @@ coreKtx = "1.19.0"
 junit = "4.13.2"
 koin = "4.2.1"
 wearCompose = "1.6.2"
+watchface = "1.2.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -22,6 +23,7 @@ compose-material3 = { group = "org.jetbrains.compose.material3", name = "materia
 compose-ui = { group = "org.jetbrains.compose.ui", name = "ui", version.ref = "compose-multiplatform" }
 wear-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "wearCompose" }
 wear-compose-foundation = { group = "androidx.wear.compose", name = "compose-foundation", version.ref = "wearCompose" }
+watchface = { group = "androidx.wear.watchface", name = "watchface", version.ref = "watchface" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

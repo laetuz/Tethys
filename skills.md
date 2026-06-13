@@ -55,11 +55,11 @@ This document outlines the core technical competencies, theoretical knowledge, a
 
 * **Android (Phone):** `MainActivity` extends `ComponentActivity` with `enableEdgeToEdge()` and `setContent { TethysTheme { TethysScreen() } }`. `TethysApp` extends `Application` and calls `startKoin { androidContext(this); modules(appModule) }`.
 * **Desktop:** `Main.kt` calls `startKoin { modules(appModule) }` then enters `application { Window(...) { ... } }`. Window size defaults to 800x600 dp.
-* **Wear OS Watch Face:** `WatchFaceActivity` renders the shark centered on the watch screen with a gentle vertical bob (`sin(frameCount * 0.05f) * 4px`). No fish, no edge bouncing — the shark fills the container and idles in place. Font size scales with screen width (`widthPx / 28`). Uses `androidx.wear.compose:compose-material` and `androidx.wear.compose:compose-foundation` instead of CMP.
+* **Wear OS Watch Face:** `WatchFaceActivity` renders the shark centered on the watch screen with a gentle vertical bob (`sin(frameCount * 0.05f) * 4px`). No fish, no edge bouncing — the shark idles in place with a swimming animation (alternating between `SHARK_NORMAL` and `SHARK_NORMAL2` every 400ms). Font size scales with screen width (`widthPx / 80`, fitting the widest ASCII line within bounds). Uses `androidx.wear.compose:compose-material` and `androidx.wear.compose:compose-foundation` instead of CMP.
 * **Shared Resources:** The `composeApp/src/androidMain/res/` directory holds phone-specific resources. `wearApp/src/main/res/` holds Wear resources. Desktop has no resource directory.
 
 ## 8. Module Architecture
 
 * **`:shared`** — KMP library. All common Compose UI (`Shark`, `LittleFish`, theme), state (`TethysViewModel`, `TethysUiState`), utils (`BrailleUtils`), and DI wiring (`AppModule`). Built with `kotlin.multiplatform` + `com.android.library` + CMP plugin.
 * **`:composeApp`** — KMP application. Phone (`androidTarget`) and Desktop (`jvm("desktop")`) entry points. Depends on `:shared` and re-declares all transitive library dependencies for that module's source sets.
-* **`:wearApp`** — Android-only Wear OS application. Standard `com.android.application` (no KMP). Depends on `:shared`'s Android AAR output. Uses Wear Compose libraries for round-screen-aware UI.
+* **`:wearApp`** — Android-only Wear OS application. Standard `com.android.application` (no KMP). Depends on `:shared`'s Android AAR output. Uses Wear Compose libraries for round-screen-aware UI. Must set `compileSdk = 33` and `targetSdk = 33` (not 36) to bypass Wear OS 5's Watch Face Format enforcement for programmatic watch faces. Must explicitly apply `kotlin-android` plugin and set `jvmTarget = JVM_11`.

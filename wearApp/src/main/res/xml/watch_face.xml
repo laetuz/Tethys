@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<WatchFace
+    width="450" height="450">
+
+    <!-- The background color or image -->
+    <Background>
+        <PartColor color="#FF000000" />
+    </Background>
+
+    <!-- The time display -->
+    <ComplicationSlot x="0" y="0" width="450" height="450">
+        <!-- Add your digital time here -->
+        <DigitalClock x="0" y="200" width="450" height="100" align="CENTER">
+            <Text>
+                <Template>%1$tH:%1$tM</Template>
+            </Text>
+            <Font family="SYNC_P" size="48" color="#FFFFFFFF" />
+        </DigitalClock>
+    </ComplicationSlot>
+
+</WatchFace>

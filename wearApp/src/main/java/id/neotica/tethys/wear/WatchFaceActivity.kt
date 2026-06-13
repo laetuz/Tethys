@@ -18,7 +18,6 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.sp
 import id.neotica.tethys.ui.screen.characters.Shark
-import id.neotica.tethys.ui.theme.TethysTheme
 import kotlinx.coroutines.isActive
 import kotlin.math.sin
 
@@ -26,7 +25,7 @@ class WatchFaceActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            TethysTheme(content = { WatchFace() })
+            WatchFace()
         }
     }
 }
