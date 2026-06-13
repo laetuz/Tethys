@@ -54,6 +54,12 @@ The project is split into three modules:
     ```bash
     ./gradlew :wearApp:assembleDebug
     ```
+*   **Create a Release (GitHub Actions):**
+    Push a version tag to trigger the CI/CD pipeline that builds both APKs and publishes a GitHub Release:
+    ```bash
+    git tag v1.0.0 && git push origin v1.0.0
+    ```
+    The workflow is defined in `.github/workflows/release.yml`. It builds both phone and Wear OS APKs, uploads them as build artifacts on every push, and creates a GitHub Release with the APKs attached when a tag matching `v*` is pushed.
 
 ---
 
