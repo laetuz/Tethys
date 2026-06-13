@@ -161,6 +161,7 @@ fun TethysScreen() {
             y = y,
             velocityX = velocityX,
             isBiting = bitingTimer > 0f,
+            onBite = { bitingTimer = BITE_DURATION_FRAMES.toFloat() },
             onSizeChanged = { textSize = it },
             fontSize = SHARK_FONT_SIZE.sp
         )
