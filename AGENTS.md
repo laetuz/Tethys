@@ -54,13 +54,21 @@ The project is split into three modules:
     ```bash
     ./gradlew composeApp:assembleDebugRelease
     ```
+*   **Build Phone Release AAB (Play Store):**
+    ```bash
+    ./gradlew composeApp:bundleRelease
+    ```
 *   **Build Wear OS Target:**
     ```bash
     ./gradlew :wearApp:assembleDebug
     ```
-*   **Build Wear OS `debugrelease` APK (minified + shrunk):**
+*   **Build Wear OS `debugRelease` APK (minified + shrunk):**
     ```bash
     ./gradlew :wearApp:assembleDebugRelease
+    ```
+*   **Build Wear OS Release AAB (Play Store):**
+    ```bash
+    ./gradlew :wearApp:bundleRelease
     ```
 *   **Create a Release (GitHub Actions):**
     Push a version tag to trigger the CI/CD pipeline that builds both APKs and publishes a GitHub Release:
@@ -104,4 +112,22 @@ The project is split into three modules:
     The watch face renderer alternates between `SHARK_NORMAL` and `SHARK_NORMAL2` every 400ms (using `zonedDateTime.toInstant().toEpochMilli()`) for swimming animation, plus a sinusoidal bob (`sin(epochMillis * 0.005) * 4f`). Font size is calculated dynamically as `bounds.width() / maxLineLength` to fit the widest ASCII line within the screen.
 *   **ASCII Frame Export:**
     Both animation frames must be public for the watch face to access them. `SHARK_NORMAL` (public) and `SHARK_NORMAL2` (renamed from private `SHARK_NORMAL_2`) are exported from `shared`'s `Shark.kt`.
+
+---
+
+## 6. Release Signing
+
+*   **Keystore:** Create a `keystore.properties` file in the project root (based on `keystore.properties.example`). It is gitignored.
+    ```properties
+    storeFile=/path/to/your/keystore.jks
+    storePassword=your-store-password
+    keyAlias=your-key-alias
+    keyPassword=your-key-password
+    ```
+*   **No Keystore Fallback:** When `keystore.properties` doesn't exist, the `release` build type falls back to the debug keystore. This is safe for local testing but **never upload a debug-signed AAB to Play Store**.
+*   **App Bundles:** Play Store requires App Bundles (`.aab`), not APKs. Build with:
+    ```bash
+    ./gradlew composeApp:bundleRelease    # Phone
+    ./gradlew :wearApp:bundleRelease      # Wear OS
+    ```
 

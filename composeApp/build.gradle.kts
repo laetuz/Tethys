@@ -5,6 +5,15 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+fun keystoreProperty(key: String): String? {
+    if (!keystorePropertiesFile.exists()) return null
+    return keystorePropertiesFile.readLines()
+        .firstOrNull { it.startsWith("$key=") }
+        ?.substringAfter("=")
+        ?.trim()
+}
+
 kotlin {
     androidTarget {
         compilerOptions {
@@ -65,11 +74,32 @@ configure<com.android.build.api.dsl.ApplicationExtension> {
         versionName = "1.0"
     }
 
+    val hasReleaseKeys = keystoreProperty("storeFile") != null
+    if (hasReleaseKeys) {
+        signingConfigs {
+            create("release") {
+                storeFile = rootProject.file(keystoreProperty("storeFile")!!)
+                storePassword = keystoreProperty("storePassword") ?: ""
+                keyAlias = keystoreProperty("keyAlias") ?: ""
+                keyPassword = keystoreProperty("keyPassword") ?: ""
+            }
+        }
+    }
+
     buildTypes {
         create("debugRelease") {
             isMinifyEnabled = true
             isShrinkResources = true
             signingConfig = signingConfigs.getByName("debug")
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro"
+            )
+        }
+        getByName("release") {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            signingConfig = signingConfigs.getByName(if (hasReleaseKeys) "release" else "debug")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
